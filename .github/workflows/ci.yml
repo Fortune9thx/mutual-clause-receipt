@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install GenLayer toolchain
+        run: pip install genlayer-test==0.30.0rc2 genvm-linter==0.11.1rc2
+
+      - name: Lint contract
+        run: genvm-lint check contracts/MutualClauseReceipt.py
+
+      - name: Run direct-mode tests
+        run: gltest tests/direct
