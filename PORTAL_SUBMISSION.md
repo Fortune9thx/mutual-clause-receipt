@@ -11,13 +11,25 @@ consent/ratification object, no domain registry.
 
 ## Deployed contract
 
-- Network: _pending deployment_
-- Address: _pending deployment_
-- Deploy transaction: _pending deployment_
+- Network: GenLayer Studio Devnet (chain 61997)
+- Address: `0x9B661ec91B1D1C82791C88B4a43134EDBa203892`
+- Deploy transaction: `0x736618a689916312067478557d1c723225e8cfce0a6a5d4dd30e08494ce31ac4`
+  (FINALIZED, MAJORITY_AGREE)
+- Explorer: https://explorer-studio-dev.genlayer.com/
+
+Live end-to-end verification performed after deploy (not just gltest):
+`register_pack` called twice (real FINALIZED writes, correct returned
+ids), an `open_overlap` call with invalid pack ids correctly reverted
+on-chain, then a real `open_overlap` + `seal_overlap` pair ran a genuine
+`gl.vm.run_nondet` leader/validator consensus round and FINALIZED with
+`{"fold": "compatible", "topics": [{"topic": "price", "relation":
+"compatible", "a_ok": true, "a_value": "100", "b_ok": true, "b_value":
+"100"}]}` - matching the deterministic interval math exactly for two
+overlapping `lte(100)` declarative clauses.
 
 ## Repository
 
-- GitHub: _pending publish_
+- GitHub: https://github.com/Fortune9thx/mutual-clause-receipt
 - Contract: `contracts/MutualClauseReceipt.py`
 - Tests: `tests/direct/test_mutual_clause_receipt.py` (26/26 passing,
   `gltest tests/direct`)
