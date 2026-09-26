@@ -27,6 +27,26 @@ on-chain, then a real `open_overlap` + `seal_overlap` pair ran a genuine
 "100"}]}` - matching the deterministic interval math exactly for two
 overlapping `lte(100)` declarative clauses.
 
+**Checkable-clause live verification** (tx
+`0x305d0d4b8af506b17e4dcf239791c53b0857b6d32a6eb32f7a41579b17fcdcd3`,
+FINALIZED, `FINISHED_WITH_RETURN`): a pack with a real checkable clause
+(witness `https://httpbin.org/base64/MTIz`, a stable endpoint that
+always decodes to the literal text `123`) was checked against a
+declarative pack requiring `<= 200`. This exercised a genuine
+`gl.nondet.web.get` fetch and `gl.nondet.exec_prompt` extraction on both
+the leader and the validator, and the extracted value came back
+canonicalized (`"123"`, not `"123.0"` or other LLM formatting variance)
+thanks to `_canonicalize_value` normalizing every extracted number
+before it's embedded in the leader/validator's compared JSON. Sealed
+result:
+
+```json
+{"overlap_id": "overlap-1", "pack_a_id": "pack-3", "pack_b_id": "pack-4",
+ "result": {"fold": "compatible", "topics": [{"a_ok": true, "a_value": "123",
+ "b_ok": true, "b_value": "200", "relation": "compatible", "topic": "test_value"}]},
+ "status": "sealed"}
+```
+
 ## Repository
 
 - GitHub: https://github.com/Fortune9thx/mutual-clause-receipt

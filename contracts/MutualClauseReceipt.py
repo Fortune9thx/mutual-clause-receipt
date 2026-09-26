@@ -118,6 +118,17 @@ def _normalize_unit(unit) -> str:
     return str(unit).strip().lower()
 
 
+def _canonicalize_value(raw) -> str:
+    text = str(raw).strip()
+    num = _parse_number(text)
+    if num is None:
+        return text
+    if num == int(num) and abs(num) < 1e15:
+        return str(int(num))
+    formatted = f"{num:.10f}".rstrip("0").rstrip(".")
+    return formatted if formatted else "0"
+
+
 def _clause_interval(op: str, value_num: float):
     if op == "eq":
         return (value_num, value_num, None)
@@ -372,7 +383,7 @@ class MutualClauseReceipt(gl.contract.Contract):
                                 prompt = _build_extract_prompt(clause_a["extract_instruction"], body_text)
                                 extraction = gl.nondet.exec_prompt(prompt, response_format="json")
                                 if isinstance(extraction, dict) and extraction.get("value") is not None:
-                                    a_extract = str(extraction["value"]).strip()
+                                    a_extract = _canonicalize_value(extraction["value"])
                                     a_ok = True
                         except Exception:
                             a_ok = False
@@ -387,7 +398,7 @@ class MutualClauseReceipt(gl.contract.Contract):
                                 prompt = _build_extract_prompt(clause_b["extract_instruction"], body_text)
                                 extraction = gl.nondet.exec_prompt(prompt, response_format="json")
                                 if isinstance(extraction, dict) and extraction.get("value") is not None:
-                                    b_extract = str(extraction["value"]).strip()
+                                    b_extract = _canonicalize_value(extraction["value"])
                                     b_ok = True
                         except Exception:
                             b_ok = False
@@ -418,7 +429,7 @@ class MutualClauseReceipt(gl.contract.Contract):
                                 prompt = _build_extract_prompt(clause_a["extract_instruction"], body_text)
                                 extraction = gl.nondet.exec_prompt(prompt, response_format="json")
                                 if isinstance(extraction, dict) and extraction.get("value") is not None:
-                                    a_extract = str(extraction["value"]).strip()
+                                    a_extract = _canonicalize_value(extraction["value"])
                                     a_ok = True
                         b_ok = True
                         b_extract = None
@@ -430,7 +441,7 @@ class MutualClauseReceipt(gl.contract.Contract):
                                 prompt = _build_extract_prompt(clause_b["extract_instruction"], body_text)
                                 extraction = gl.nondet.exec_prompt(prompt, response_format="json")
                                 if isinstance(extraction, dict) and extraction.get("value") is not None:
-                                    b_extract = str(extraction["value"]).strip()
+                                    b_extract = _canonicalize_value(extraction["value"])
                                     b_ok = True
                         relation = _topic_relation(clause_a, clause_b, a_ok, a_extract, b_ok, b_extract)
                         topics_out.append({
