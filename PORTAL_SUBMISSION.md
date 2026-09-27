@@ -12,36 +12,32 @@ consent/ratification object, no domain registry.
 ## Deployed contract
 
 - Network: GenLayer Studio Devnet (chain 61997)
-- Address: `0x9B661ec91B1D1C82791C88B4a43134EDBa203892`
-- Deploy transaction: `0x736618a689916312067478557d1c723225e8cfce0a6a5d4dd30e08494ce31ac4`
+- Address: `0x91BC43cC104705600b6afD1a1F07f1Ea33c21585`
+- Deploy transaction: `0x9258a67b8095967e4e5e40fd84bc061973d1b41561d44dc0d88c2c9f76963e94`
   (FINALIZED, MAJORITY_AGREE)
-- Explorer: https://explorer-studio-dev.genlayer.com/
+- Explorer: https://explorer-studio-dev.genlayer.com/address/0x91BC43cC104705600b6afD1a1F07f1Ea33c21585
+- Deployed source matches GitHub `master` at commit `1f40552` (includes
+  the leader/validator value-canonicalization fix) exactly - this
+  address supersedes an earlier deploy at `0x9B661ec91B1D1C82791C88B4a43134EDBa203892`,
+  which was built from an older commit that predated that fix and has
+  been retired; do not use it as evidence.
 
-Live end-to-end verification performed after deploy (not just gltest):
-`register_pack` called twice (real FINALIZED writes, correct returned
-ids), an `open_overlap` call with invalid pack ids correctly reverted
-on-chain, then a real `open_overlap` + `seal_overlap` pair ran a genuine
-`gl.vm.run_nondet` leader/validator consensus round and FINALIZED with
-`{"fold": "compatible", "topics": [{"topic": "price", "relation":
-"compatible", "a_ok": true, "a_value": "100", "b_ok": true, "b_value":
-"100"}]}` - matching the deterministic interval math exactly for two
-overlapping `lte(100)` declarative clauses.
-
-**Checkable-clause live verification** (tx
-`0x305d0d4b8af506b17e4dcf239791c53b0857b6d32a6eb32f7a41579b17fcdcd3`,
-FINALIZED, `FINISHED_WITH_RETURN`): a pack with a real checkable clause
-(witness `https://httpbin.org/base64/MTIz`, a stable endpoint that
-always decodes to the literal text `123`) was checked against a
-declarative pack requiring `<= 200`. This exercised a genuine
+Live end-to-end verification performed against this exact deployment
+(not just gltest): `register_pack` called twice (real FINALIZED writes,
+returning `pack-0` and `pack-1`), then `open_overlap` + `seal_overlap`
+ran a genuine `gl.vm.run_nondet` leader/validator consensus round -
+including a real checkable clause (witness `https://httpbin.org/base64/MTIz`,
+a stable endpoint that always decodes to the literal text `123`) checked
+against a declarative pack requiring `<= 200`. This exercised a real
 `gl.nondet.web.get` fetch and `gl.nondet.exec_prompt` extraction on both
-the leader and the validator, and the extracted value came back
-canonicalized (`"123"`, not `"123.0"` or other LLM formatting variance)
-thanks to `_canonicalize_value` normalizing every extracted number
-before it's embedded in the leader/validator's compared JSON. Sealed
-result:
+the leader and the validator, with `_canonicalize_value` normalizing the
+extracted number before comparison. Seal transaction
+`0x075d1ac0be0368959ac1967ec847feffa3b63f64062b3c32c240946ad6075147`
+(FINALIZED, `FINISHED_WITH_RETURN`); reading `get_overlap("overlap-0")`
+back from the deployed contract returns:
 
 ```json
-{"overlap_id": "overlap-1", "pack_a_id": "pack-3", "pack_b_id": "pack-4",
+{"overlap_id": "overlap-0", "pack_a_id": "pack-0", "pack_b_id": "pack-1",
  "result": {"fold": "compatible", "topics": [{"a_ok": true, "a_value": "123",
  "b_ok": true, "b_value": "200", "relation": "compatible", "topic": "test_value"}]},
  "status": "sealed"}
